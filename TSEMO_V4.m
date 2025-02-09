@@ -1,4 +1,4 @@
-function [Xpareto,Ypareto,X,Y,XParetoGP,YParetoGP,YParetoGPstd,hypf] = TSEMO_V4(f,X,Y,lb,ub,Opt)
+function [Xpareto,Ypareto,X,Y,XParetoGP,YParetoGP,YParetoGPstd,hypf,times] = TSEMO_V4(f,X,Y,lb,ub,Opt)
 %  Copyright (c) by Eric Bradford, Artur M. Schweidtmann and Alexei Lapkin, 2020-23-05.
 %  Version 4 by Eric Bradford (eric.bradford@ntnu.no), Artur M.
 %  Schweidtmann (Artur.Schweidtmann@avt.rwth-aachen.de) and Alexei Lapkin
@@ -23,6 +23,7 @@ function [Xpareto,Ypareto,X,Y,XParetoGP,YParetoGP,YParetoGPstd,hypf] = TSEMO_V4(
 %       lb      lower bounds of input variables [1,D]
 %       ub      upper bounds of input variables [1,D]
 %       Opt     options struct of algorithm
+%       hvdim   Dimension of hypervolume calculation (default = 2, maximum = 3)
 
 %   with
 %       n       number of given data points
@@ -60,6 +61,7 @@ for i = 1:ceil(Opt.maxeval/Opt.NoOfBachSequential)
     
     %% Sampling point at maximum hypervolume improvement
     [index,hv_imp] = hypervolume_improvement_index(Ynew,Sample_nadir,Sample_pareto,Opt);
+    r = Sample_nadir + 0.01*(max(Sample_pareto)-min(Sample_pareto));
     
     xNew = Sample_xpareto(index,:);
     Xnew = [Xnew;xNew];
@@ -84,6 +86,7 @@ for i = 1:ceil(Opt.maxeval/Opt.NoOfBachSequential)
     Ypareto = Y(front,:);
     
     %% Update log each iterations
+    times(i) = toc;
     update_log_file(it,hv_imp,toc,xnewtrue,ytrue,Opt,Y,ub,lb)
     
     %% Display
